@@ -1,0 +1,124 @@
+\documentclass[12pt]{article}
+\usepackage{design_ASC}
+\usepackage{ifthen}
+\usepackage{booktabs}
+\usepackage{bbm}
+\usepackage{algorithm,algorithmic}
+\newboolean{sol}   
+\newcommand{\prsol}[1]{\ifthenelse{\boolean{sol}}{{\color{blue}\textbf{Solution:} #1}}{} }
+
+\setlength\parindent{0pt} %% Do not touch this
+\setlength{\parskip}{1em}
+
+%% -----------------------------
+%% TITLE
+%% -----------------------------
+\title{Problem Set \#5} %% Assignment Title
+
+\author{ECE 4424 / CS 4824 - Machine learning\\ %% Code and course name
+\textsc{Virginia Tech}
+}
+
+%\date{\today} %% Change "\today" by another date manually
+%% -----------------------------
+%% -----------------------------
+
+%% %%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+\setboolean{sol}{false}   
+
+
+\setlength{\droptitle}{-5em}    
+%% %%%%%%%%%%%%%%%%%%%%%%%%%
+\maketitle
+
+% --------------------------
+% Start here
+% --------------------------
+
+\begin{itemize}
+    \item Feel free to collaborate with other classmates in doing the homework. Please indicate your collaborators with their student ID. You should, however, write down your solution yourself. Please try to keep the answers brief and clear.
+    \item Whenever you need clarification, please post the related questions on Piazza under the corresponding homework folder.
+    \item Total: 100 points
+    \item \textbf{Due date: 12/5/2020, 11:59PM ET}
+    \item Late submission: each student will have a total of \textbf{four} free late (calendar) days to use for homeworks. \textbf{Note: this is the total number of late days accumulated through all the homeworks so far. It's NOT reset after each homework!} Once these late days are exhausted, any assignments turned in late will be penalized 20\% per late day. However, no assignment will be accepted more than three days after its due date. Each 24 hours or part thereof that a homework is late uses up one full late day. 
+\end{itemize}
+
+
+
+% %%%%%%%%%%%%%%%%%%%
+\section{K-Means algorithm (30 pts)}
+\label{sec:perceptron}
+% %%%%%%%%%%%%%%%%%%%
+
+Given the dataset which contains points $x_1 = (1,2)$, $x_2 = (2,2)$,  $x_3 = (2, 1)$, $x_4 = (-1, 5)$, $x_5= (-2, -1)$, $x_6 = (-1,-1)$. Suppose we want to have 2 clusters. Answer the following questions:
+\begin{itemize}
+    \item[a)] (15 pts) Initialize the clusters cluster by $\mu_1=x_1$  and $\mu_2=x_4$, run the K-means clustering algorithm and report the final clusters (in terms of the points in each cluster and the cluster centers). Use L1 distance as the distance between points which is given by
+    \begin{equation*}
+        d(x,y) = \sum_{j=1}^d |x^{(j)}-y^{(j)}|
+    \end{equation*}
+    where $x^{(j)}$ is the $j-$th entry of $x\in\mathbb{R}^d$.
+    \item[b)] (5 pts)  Draw the points on a 2-D grid and check if the clusters make sense.
+    \item[c)] (10 pts) Can you find an initialization that results in a different clustering?
+\end{itemize}
+
+\prsol{
+}
+
+% %%%%%%%%%%%%%%%%%%%
+\section{Programming assignment (70 pts)}
+% %%%%%%%%%%%%%%%%%%%
+
+For the following programming assignment, please download the datasets and iPython notebooks from Canvas and submit the following:
+\begin{itemize}
+    \item Completed and ready-to-run iPython notebooks. Note: we will inspect the code and run your notebook if needed. If we cannot run any section of your notebook, you will not receive any points for the task related to that section. 
+    \item Responses (texts, codes, and/or figures) to the following problems/tasks
+\end{itemize}
+
+
+In this programming assignment, we will experiment with distributed representations of words. We'll also see how such an embedding can be constructed by applying principal component analysis to a suitably transformed matrix of word co-occurrence probabilities.
+
+
+
+\textbf{Task P1 (5 pts):} Complete the following code to get a list of words and their counts. Report how many times does the word "evidence" and "investigation" appears in the corpus.
+
+\textbf{Task P2 (10 pts):} Decide on the vocabulary. There are two potentially distinct vocabularies: the words for which we will obtain embeddings (`vocab\_words`) and the words we will consider when looking at context information (`context\_words`). We will take the former to be all words that occur at least 20 times, and the latter to be all words that occur at least 100 times. We will stick to these choices for this assignment, but feel free to play around with them and find something better. Also, report the sizes of these two word lists.
+
+\textbf{Task P3 (10 pts):} Get co-occurrence counts. These are defined as follows, for a small constant `window\_size=2`:
+\begin{itemize}
+    \item Let `w0` be any word in `vocab\_words` and `w` any word in `context\_words`.
+    \item Each time `w0` occurs in the corpus, look at the window of `window\_size` words before and after it. If `w` appears in this window, we say it appears in the context of (this particular occurrence of) `w0`.
+    \item Define `counts[w0][w]` as the total number of times `w` occurs in the context of `w0`.
+\end{itemize}
+
+Complete the function `get\_counts`, which computes the `counts` array, and returns it as a dictionary (of dictionaries). Find how many times the word "fact" appears in the context of ”evidence" with window\_size=2.
+
+\textbf{Task P4 (10 pts):} Define `probs[w0][]` to be the distribution over the context of `w0`, that is:
+
+probs[w0][w] = counts[w0][w] / (sum of all counts[w0][])
+
+Finish the function `get\_co\_occurrence\_dictionary` that computes `probs`. Find the probability that the word "fact" appears in the context of ”evidence".
+
+\textbf{Task P5 (10 pts):} Based on the various pieces of information above, we compute the pointwise mutual information matrix (PMI):
+
+\begin{equation*}
+    \text{PMI}[i,j] = \max\left(0, \log \frac{\text{probs}[\text{i-th vocab word}][\text{j-th context word}]}{ \text{context\_frequency[j-th context word]}}\right)
+\end{equation*}
+
+Complete the code to compute PMI for every word i and context word j. Report the output of the code.
+
+\textbf{Task P6 (10 pts):} Implement the following function that finds the nearest neighbor of a given word in the embedded space. Note down the answers to the following queries. 
+
+
+\textbf{Task P7 (15 pts):} Implement the function that aims to solve the analogy problem:
+
+A is to B as C is to ?
+
+For example, A=King, B=Queen, C=man, and the answer for ? should be ideally woman (you will see that this may not be the case using the distributed representation).
+
+Finds the K-nearest neighbor of a given word in the embedded space. Note: instead of outputting only the nearest neighbor, you should find the K=10 nearest neighbors and see whether there is one in the list that makes sense. You should also exclude the words C in the output list.
+
+Also report another set A, B, C and the corresponding answer output by your problem. See if it makes sense to you.
+
+
+\end{document}
