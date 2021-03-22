@@ -1,0 +1,261 @@
+\documentclass[12pt]{article}
+\usepackage{design_ASC}
+\usepackage{ifthen}
+\usepackage{booktabs}
+\usepackage{bbm}
+\usepackage{algorithm,algorithmic}
+\newboolean{sol}   
+\newcommand{\prsol}[1]{\ifthenelse{\boolean{sol}}{{\color{blue}\textbf{Solution:} #1}}{} }
+
+\setlength\parindent{0pt} %% Do not touch this
+\setlength{\parskip}{1em}
+
+%% -----------------------------
+%% TITLE
+%% -----------------------------
+\title{Problem Set \#4} %% Assignment Title
+
+\author{ECE 4424 / CS 4824 - Machine learning\\ %% Code and course name
+\textsc{Virginia Tech}
+}
+
+%\date{\today} %% Change "\today" by another date manually
+%% -----------------------------
+%% -----------------------------
+
+%% %%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+\setboolean{sol}{false}   
+
+
+\setlength{\droptitle}{-5em}    
+%% %%%%%%%%%%%%%%%%%%%%%%%%%
+\maketitle
+
+% --------------------------
+% Start here
+% --------------------------
+
+\begin{itemize}
+    \item Feel free to collaborate with other classmates in doing the homework. Please indicate your collaborators with their student ID. You should, however, write down your solution yourself. Please try to keep the answers brief and clear.
+    \item Whenever you need clarification, please post the related questions on Piazza under the corresponding homework folder.
+    \item Total: 100 points
+    \item \textbf{Due date: 11/13/2020, 11:59PM ET}
+    \item Late submission: each student will have a total of \textbf{four} free late (calendar) days to use for homeworks. \textbf{Note: this is the total number of late days accumulated through all the homeworks so far. It's NOT reset after each homework!} Once these late days are exhausted, any assignments turned in late will be penalized 20\% per late day. However, no assignment will be accepted more than three days after its due date. Each 24 hours or part thereof that a homework is late uses up one full late day. 
+\end{itemize}
+
+
+
+% %%%%%%%%%%%%%%%%%%%
+\section{Perceptron algorithm: proof of convergence (40 pts)}
+\label{sec:perceptron}
+% %%%%%%%%%%%%%%%%%%%
+
+Recall that the perceptron algorithm iteratively finds a linear decision boundary for binary classification. Given a dataset $\{(x_{1},y_1),...,(x_n,y_n)\}$
+where $x_{i} \in \mathbb{R}^{d}$ are feature vectors and $y_i\in\{-1,+1\}$ are labels.  The linear classifier is parametrized by $\theta\in \mathbb{R}^{d}$ (for simplicity, we assimilate the intercept into the parameters $\theta$), and predicts +1 at a point $x$ if $\theta\cdot x>0$ and -1 otherwise. The perceptron algorithm is given in Algorithm \ref{alg:perceptron}.
+
+\begin{algorithm}
+\begin{algorithmic}[1]
+\caption{Perceptron algorithm }
+\REQUIRE Dataset $\{(x_{1},y_1),...,(x_n,y_n)\}$
+\STATE Initialize $\theta^1 = 0$, iteration number $t=1$, and number of updates $m_\mathrm{update}=0$.
+\WHILE{We encounter a point $(x,y)$ that is misclassified}
+    \STATE Update $\theta^{t+1} \leftarrow \theta^{t}+yx$ (Here, we denote $\theta^{t}$ as the parameter $\theta$ before the $t$-th update.)
+    \STATE Update iteration number $t\leftarrow t+1$
+    \STATE Increment the counter for updates: $m_\mathrm{update}\leftarrow m_\mathrm{update}+1$
+\ENDWHILE
+\end{algorithmic}
+\label{alg:perceptron}
+\end{algorithm}
+
+In this problem, we are going to go through the proof for the convergence of Perceptron algorithm. Your job is to read the proof and indicate the reasoning for some key steps. The theorem of convergence is shown below:
+
+\begin{theorem}{(Convergence of Perceptron algorithm)}
+Assume that there exists some parameter vector $\theta^*$ such that \begin{equation}
+    \|\theta^*\|=1
+    \label{equ:ass1}
+\end{equation} (note that for any vector $x$, $\|x\|$ refers to the Euclidean norm of $x$, i.e., $\|x\|=\sqrt{\sum_j (x^{(j)})^2}$), and some scalar $\gamma>0$ such that for all $i=1,...,n$,
+\begin{equation}
+    y_i(x_i\cdot\theta^*)\geq \gamma
+    \label{equ:ass2}
+\end{equation}
+(note the above condition simply means that we can find a linear classifier that perfectly classify every data point with a margin $\gamma$.) Also assume that for all $i=1,...,n$, the feature $x_i$ is bounded by a constant $R>0$:
+\begin{equation}
+    \|x_i\|\leq R
+    \label{equ:ass3}
+\end{equation}
+During the learning process, whenever we found a data that is misclassified, we need to update the parameters. The number of times we update the parameters is given by $m_\mathrm{update}$ in Algorithm \ref{alg:perceptron}.  It can be proved that the perceptron algorithm makes at most $\frac{R^2}{\gamma^2}$ updates:
+\begin{equation}
+    m_\mathrm{update}\leq \frac{R^2}{\gamma^2}
+\end{equation}
+\end{theorem}
+
+\begin{proof}
+First, we define $\theta^t$ to be the parameter vector  when the algorithm makes its $t$-th error (thus needs to update the parameters). You can also think of it as the parameter $\theta$ before the $t$-th update (as indicated in Algorithm \ref{alg:perceptron}). Note that we have 
+\begin{equation}
+    \theta^1 =0
+    \label{equ:1}
+\end{equation}
+Next, assume the $t$-th error is made on example $k$, we have
+\begin{align}
+    \theta^{t+1}\cdot \theta^*&=(\theta^{t}+y_kx_k)\cdot \theta^*\label{equ:2}\\
+    &=\theta^{t}\cdot \theta^*+y_kx_k\cdot \theta^*\\
+    &\geq \theta^{t}\cdot \theta^*+\gamma \label{equ:3}
+\end{align}
+
+From the above relationship,  we can derive that
+\begin{equation}
+    \theta^{t+1}\cdot \theta^*\geq t\gamma
+    \label{equ:4}
+\end{equation}
+
+From the above, we can show that
+\begin{equation}
+    \|\theta^{t+1}\|\geq t\gamma\label{equ:cauchy}
+\end{equation}
+In the second part of the proof, we will derive an upper bound on $\|\theta^{t+1}\|$. We have
+\begin{align}
+    \|\theta^{t+1}\|^2&=\|\theta^{t}+y_kx_k\|^2\label{equ:5}\\
+    &= \|\theta^{t}\|^2+y_k^2\|x_k\|^2+2y_kx_k\cdot \theta^t\\
+    &\leq \|\theta^{t}\|^2+R^2\label{equ:6}
+\end{align}
+
+From the above, we can show that 
+\begin{equation}
+    \|\theta^{t+1}\|\leq tR^2\label{equ:7}
+\end{equation}
+
+STUDENT: Finish the rest of the proof.
+\end{proof}
+
+\textbf{Read and understand the above proof and answer the following questions.} Hint: for most questions, you need to closely examine the algorithm (listed in Algirthm \ref{alg:perceptron}) and the assumptions Equ. \eqref{equ:ass1}, \eqref{equ:ass2} and \eqref{equ:ass3} made in the Theorem.
+\begin{enumerate}
+    \item[a)] (3 pts) Explain why it is true for Equ. \eqref{equ:1}.
+    \item[b)] (3 pts) Explain why it is true for Equ. \eqref{equ:2}.
+    \item[c)] (4 pts) Explain why it is true for Equ. \eqref{equ:3}.
+    \item[d)] (8 pts) Explain why it is true for Equ. \eqref{equ:4}.
+    \item[e)] (6 pts) Explain why it is true for Equ. \eqref{equ:cauchy}. Hint: you can use the Cauchy–Schwarz inequality $x\cdot z\leq \|x\|\|z\|$ for $x,z\in\mathbb{R}^d$.
+    \item[f)] (6 pts) Explain why it is true for Equ. \eqref{equ:6}.
+    \item[g)] (10 pts) Finish the rest of the proof.
+\end{enumerate}
+
+\prsol{
+
+
+}
+
+
+
+% %%%%%%%%%%%%%%%%%%%
+\section{Programming assignment (60 pts)}
+% %%%%%%%%%%%%%%%%%%%
+
+For the following programming assignment, please download the datasets and iPython notebooks from Canvas and submit the following:
+\begin{itemize}
+    \item Completed and ready-to-run iPython notebooks. Note: we will inspect the code and run your notebook if needed. If we cannot run any section of your notebook, you will not receive any points for the task related to that section. 
+    \item Responses (texts, codes, and/or figures) to the following problems/tasks
+\end{itemize}
+
+
+In this programming exercise, you will build a soft-margin support vector machine model for sentiment analysis.
+
+Recall that support vector machine (SVM) finds a linear decision boundary with the largest margin for a binary classification problem. Suppose we have a training dataset $\{(x_{1},y_1),...,(x_n,y_n)\}$
+where $x_{i} \in \mathbb{R}^{d}$ are feature vectors and $y_i\in\{-1,+1\}$ are labels.  The linear classifier is parametrized by $\theta\in \mathbb{R}^{d}$ and $\theta_0\in\mathbb{R}$, and predicts +1 at a point $x$ if $\theta\cdot x+\theta_0>0$ and -1 otherwise. 
+
+To train a soft-margin SVM, we need to solve the following constrained optimization problem:
+\begin{subequations}
+    \label{equ:svm}
+	\begin{align}
+    & \underset{\theta\in\mathbb{R}^d,\theta\in\mathbb{R},
+\xi_1,...,\xi_n}{\text{min~~~}}
+	&& \hspace{-3cm}\|\theta\|^2+C\sum_{i=1}^n\xi_i\\
+	& \text{s.t.~~~}
+	&& \hspace{-3cm}y_i(\theta\cdot x_i+\theta_0)\geq 1-\xi_i,\quad\text{for $i=1,...,n$}\\
+	&&& \hspace{-3cm}\xi_i\geq 0,\quad\text{for $i=1,...,n$}
+	\end{align}
+\end{subequations}
+where $\theta\in\mathbb{R}^d,\theta\in\mathbb{R}$ are the parameters of a linear decision boundary, and $\xi_i$ is the slack variable assigned to each data point $i$.
+
+It turns out that the above optimization is equivalent to the following unconstrained optimization:
+    
+\begin{align}
+    & \underset{\theta\in\mathbb{R}^d,\theta\in\mathbb{R}}{\text{min~~~}}
+	&& \hspace{-3cm}\|\theta\|^2+C\sum_{i=1}^n\ell_{\mathrm{hinge}}(y_i(\theta\cdot x_i+\theta_0))\label{equ:svm2}
+\end{align}
+
+where  $\ell_{\mathrm{hinge}}(t)=\max(0,1-t)$ is called the ``hinge loss,'' which takes value $1-t$ if $t<1$ and 0 otherwise. For example, $\ell_{\mathrm{hinge}}(-1)=2$, and $\ell_{\mathrm{hinge}}(2)=0$. 
+
+
+
+\textbf{Task P1 (10 pts):} Reason why optimization \eqref{equ:svm} and \eqref{equ:svm2} are equivalent. 
+
+{\it
+Hint: The following idea is often used in optimization (also known as the ``epigraph'' idea). Suppose you want to find the optimal solution $\theta$ of the optimization:
+\begin{subequations}
+	\begin{align}
+    & \underset{\theta\in\mathbb{R}^d,t}{\text{min~~~}}
+	&& \hspace{-5cm}t\\
+	& \text{s.t.~~~}
+	&& \hspace{-5cm}t\geq h(\theta)\label{equ:ineq}
+	\end{align}
+	\label{equ:epi}
+\end{subequations}
+where $h(\theta)$ is any function of $\theta$, it is equivalent to solve the following unconstrained optimization:
+\begin{align}
+    & \underset{\theta\in\mathbb{R}^d}{\text{min~~~}}
+	&& \hspace{-5cm}h(\theta)
+	\label{equ:epi2}
+\end{align}
+The reason is intuitive. For \eqref{equ:epi}, by the constraint $t\geq h(\theta)$, we know that for a given $\theta$, $h(\theta)$ will be the lower bound for $t$. So if we find a parameter $\theta$, then to minimize the objective, we should just set $t=h(\theta)$. Since we want to find the minimum $t$ possible, all we need is to find the $\theta$ such that $h(\theta)$ is minimum, and set $t$ to that number. In other words, the inequality constraint \eqref{equ:ineq} at optimal will become equality, so \eqref{equ:epi} is equivalent to:
+\begin{subequations}
+	\begin{align}
+    & \underset{\theta\in\mathbb{R}^d,t}{\text{min~~~}}
+	&& \hspace{-5cm}t\\
+	& \text{s.t.~~~}
+	&& \hspace{-5cm}t= h(\theta)
+	\end{align}
+	\label{equ:epi3}
+\end{subequations}
+which is equivalent to \eqref{equ:epi2} at optimal by simply replace $t$ with $h(\theta)$ in the objective. Note that here, we only care about $\theta$. Once we get an optimal $\theta$, then we can simply find the optimal $t$ by setting it equal to $h(\theta)$. This gist of this idea can be used to reason about the equivalence between \eqref{equ:svm} and \eqref{equ:svm2}.}
+
+
+It turns out that for gradient-based optimization, hinge loss may be difficult to deal with because it is not differentiable at point $t=1$. One solution is to use the ``smoothed version'' of hinge loss:
+
+$$\ell_{\mathrm{smooth-hinge}}(t) = \begin{cases}
+\frac{1}{2} - t      & \text{if} ~~ t \le 0, \\
+\frac{1}{2} (1 - t)^2 & \text{if} ~~ 0 < t < 1, \\
+0                      & \text{if} ~~ 1 \le t
+\end{cases}$$
+
+Thus, in the rest of the problem, we will consider the following optimization:
+\begin{align}
+    & \underset{\theta\in\mathbb{R}^d,\theta\in\mathbb{R}}{\text{min~~~}}
+	&& \hspace{-3cm}\|\theta\|^2+C\sum_{i=1}^n\ell_{\mathrm{smooth-hinge}}(y_i(\theta\cdot x_i+\theta_0))\label{equ:svm3}
+\end{align}
+\textbf{Task P2 (8 pts):}  Implement the hinge loss function and the smooth hinge loss function. Plot the function $\ell_{\mathrm{hinge}}(t)$ and $\ell_{\mathrm{smooth-hinge}}(t)$for $t\in[-5,5]$.
+
+
+\textbf{Task P3 (8 pts):}  Find the derivative of the smoothed hinge loss function $\ell_{\mathrm{smooth-hinge}}(t)$. Hint: you need to consider the gradients separately where $t\leq 0$, $0<t<1$, and $t\geq 1$
+
+\prsol{
+
+}
+
+\textbf{Task P4 (10 pts):}  Find the derivative of the hinge loss function $\ell_{\mathrm{smooth-hinge}}(y_i(\theta\cdot x_i+\theta_0))$ with respect to $\theta$ and $\theta_0$. Hint: you need to consider the gradients separately where $y_i(\theta\cdot x_i+\theta_0)\leq 0$, $y_i(\theta\cdot x_i+\theta_0)\in(0,1)$, and $y_i(\theta\cdot x_i+\theta_0)\geq 1$.
+
+\prsol{
+}
+
+\textbf{Task P5 (10 pts):} Let $f(\theta,\theta_0)= \|\theta\|^2+C\sum_{i=1}^n\ell_{\mathrm{smooth-hinge}}(y_i(\theta\cdot x_i+\theta_0))$ be the objective function of \eqref{equ:svm3}. Implement the function that obtains the partial derivative $\frac{\partial }{\partial \theta}f(\theta,\theta_0)$ and $\frac{\partial }{\partial \theta_0}f(\theta,\theta_0)$. Also, print out the output of the code that calculates the derivatives at $\theta=1$ and $\theta_0=1$ with $C=1$. Hint: you need to calculate the partial derivative of the smoothed hinge loss for each data point separately, and add them together to obtain the result.
+
+\prsol{
+
+}
+
+
+\textbf{Task P6  (10 pts):} For sentiment analysis data, choose a value for the trade-off parameter $C$ in \eqref{equ:svm3}.  Report the training error at convergence and the testing error.
+
+\textbf{Task P7  (4 pts):} List 4 example sentences that are correctly classified by SVM, and 4 example sentences that are  incorrectly classified by SVM. Explain what you have found.
+
+
+\end{document}
